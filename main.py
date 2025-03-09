@@ -108,3 +108,5 @@ pdf_to_xml_tool = PDFtoXMLSchemaTool()
 pdf_path = "CATL_ESS_ModbusTCP_Communication_Protocol_Between_BMS_and_BSC_removed.pdf"  # Replace with actual PDF path
 xml_schema = pdf_to_xml_tool.forward(pdf_path)
 print(xml_schema)
+
+
