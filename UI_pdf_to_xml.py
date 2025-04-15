@@ -55,7 +55,7 @@ class PDFtoXMLSchemaTool(Tool):
 
                 for chunk in text_chunks:
                     response = client.chat.completions.create(
-                        model="llama3-70b-8192",
+                        model="qwen-qwq-32b",
                         messages=[
                             {"role": "system", "content": (
                                 "Extract structured content while preserving all text, symbols, emojis, and special formatting. "
