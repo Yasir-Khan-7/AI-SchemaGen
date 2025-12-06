@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 from typing import List
 
 import fitz  # PyMuPDF
-import groq
+import requests
 
 
 class PDFtoXMLSchemaTool:
@@ -18,7 +18,7 @@ class PDFtoXMLSchemaTool:
     def __init__(self, api_key: str, model: str = "meta-llama/llama-4-maverick-17b-128e-instruct"):
         if not api_key:
             raise ValueError("GROQ_API_KEY is required.")
-        self.client = groq.Client(api_key=api_key)
+        self.api_key = api_key
         self.model = model
 
     @staticmethod
@@ -66,21 +66,31 @@ class PDFtoXMLSchemaTool:
             try:
                 fragments = []
                 for chunk in self.chunk_text(page_text):
-                    response = self.client.chat.completions.create(
-                        model=self.model,
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": (
-                                    "Extract structured content while preserving all text, symbols, emojis, and special formatting. "
-                                    "Ensure XML hierarchy includes headers, paragraphs, and tables with correct alignment. "
-                                    "Do not omit any content or modify text formatting."
-                                ),
-                            },
-                            {"role": "user", "content": chunk},
-                        ],
+                    resp = requests.post(
+                        "https://api.groq.com/openai/v1/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {self.api_key}",
+                            "Content-Type": "application/json",
+                        },
+                        json={
+                            "model": self.model,
+                            "messages": [
+                                {
+                                    "role": "system",
+                                    "content": (
+                                        "You are an XML document converter. Convert the provided text into well-formed XML. "
+                                        "Use semantic tags like <title>, <heading>, <paragraph>, <list>, <item>, <table>, <row>, <cell>. "
+                                        "Preserve ALL text exactly as written. Return ONLY valid XML without markdown code fences or explanations."
+                                    ),
+                                },
+                                {"role": "user", "content": f"Convert this text to XML:\n\n{chunk}"},
+                            ],
+                        },
+                        timeout=60,
                     )
-                    fragment = self.clean_xml_output(response.choices[0].message.content.strip())
+                    resp.raise_for_status()
+                    data = resp.json()
+                    fragment = self.clean_xml_output(data["choices"][0]["message"]["content"].strip())
                     fragments.append(fragment)
 
                 full_xml = "\n".join(fragments)
