@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Teal/Turquoise themed UI matching Streamlit Cloud
+# Teal/Turquoise themed UI
 st.markdown("""
 <style>
     /* Beautiful teal color scheme */
@@ -37,57 +37,42 @@ st.markdown("""
         background: linear-gradient(135deg, #5fa9a6 0%, #4a8885 100%);
         color: var(--text-white);
     }
-    
-    /* Header section */
+
+    /* Header block */
     .header-container {
         text-align: center;
-        padding: 3rem 1rem 2.5rem;
-        margin-bottom: 2rem;
+        padding: 2.5rem 1rem 1.5rem;
     }
-    
     .badge {
         display: inline-block;
-        background: rgba(255, 255, 255, 0.2);
-        padding: 0.5rem 1.5rem;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        margin-bottom: 1rem;
-        color: var(--text-white);
+        color: #c0e7e5;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
     }
-    
     .main-title {
-        font-size: 3.5rem;
+        font-size: 3rem;
         font-weight: 800;
-        color: var(--text-white);
-        margin-bottom: 1rem;
+        margin: 0.4rem 0 0.9rem;
+        color: #ffffff;
         letter-spacing: -0.02em;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
-    
-    .title-icon {
-        display: inline-block;
-        margin-right: 1rem;
-        vertical-align: middle;
-    }
-    
     .subtitle {
-        font-size: 1.15rem;
-        color: var(--text-light);
-        max-width: 700px;
-        margin: 0 auto;
+        max-width: 760px;
+        margin: 0 auto 1.8rem;
+        font-size: 1.05rem;
+        color: #e8f4f3;
         line-height: 1.7;
     }
-    
+
     /* Content cards - subtle translucent panels */
     .content-card {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid var(--border-light);
-        border-radius: 14px;
-        padding: 1.5rem;
-        height: 100%;
-        backdrop-filter: blur(4px);
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        height: auto;
         margin-bottom: 1.25rem;
     }
     
@@ -101,20 +86,55 @@ st.markdown("""
     
     /* File uploader */
     [data-testid="stFileUploader"] {
-        background: #f8f9fa;
-        border: 2px dashed var(--border-light);
-        border-radius: 12px;
-        padding: 2.5rem 1rem;
-        transition: all 0.3s ease;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        transition: none;
+        display: flex;
+        justify-content: center;
+        margin-top: 1.25rem;
     }
-    
-    [data-testid="stFileUploader"]:hover {
-        border-color: var(--primary-teal);
-        background: rgba(95, 169, 166, 0.05);
+    [data-testid="stFileUploader"] section {
+        width: auto !important;
+        min-width: 260px;
+        background: transparent !important;
+        padding: 0 !important;
+        border: none !important;
     }
-    
-    [data-testid="stFileUploader"] label {
-        color: #666 !important;
+    /* Hide default texts and drag/drop hints; show only the button */
+    [data-testid="stFileUploader"] label,
+    [data-testid="stFileUploader"] p,
+    [data-testid="stFileUploader"] small,
+    [data-testid="stFileUploaderFileList"],
+    [data-testid="stFileUploader"] svg,
+    [data-testid="stFileUploader"] div:nth-child(2) {
+        display: none !important;
+    }
+    /* Style the native button */
+    [data-testid="stFileUploader"] button {
+        visibility: visible !important;
+        display: inline-block !important;
+        background: linear-gradient(135deg, #e65858 0%, #d94747 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 0.9rem 2.2rem !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
+        box-shadow: 0 10px 26px rgba(0,0,0,0.18) !important;
+        margin-left: 3rem;
+    }
+    [data-testid="stFileUploader"] button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.16) !important;
+        border-color: rgba(0,0,0,0.12) !important;
+    }
+    [data-testid="stFileUploader"] button:active {
+        transform: translateY(0);
+    }
+    [data-testid="stFileUploaderDeleteBtn"] {
+        display: none !important;
     }
     
     /* Buttons - Red accent for primary */
@@ -151,8 +171,10 @@ st.markdown("""
     }
     /* Download button - Teal */
     .stDownloadButton > button {
-        background: linear-gradient(135deg, var(--primary-teal) 0%, var(--dark-teal) 100%);
-        box-shadow: 0 4px 16px rgba(95, 169, 166, 0.3);
+        background: linear-gradient(135deg, #e65858 0%, #d94747 100%);
+        box-shadow: 0 8px 20px rgba(226, 88, 88, 0.35);
+        color: #ffffff !important;
+        border: none !important;
     }
     
     .stDownloadButton > button:hover {
@@ -259,6 +281,18 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Initialize API key
+api_key = os.getenv("GROQ_API_KEY")
+if not api_key:
+    st.error("⚠️ GROQ_API_KEY environment variable not set. Please configure it before running.")
+    st.stop()
+
+# Initialize session state
+if "xml_content" not in st.session_state:
+    st.session_state.xml_content = None
+if "xml_path" not in st.session_state:
+    st.session_state.xml_path = None
+
 # Header
 st.markdown("""
 <div class="header-container">
@@ -273,63 +307,42 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Initialize API key
-api_key = os.getenv("GROQ_API_KEY")
-if not api_key:
-    st.error("⚠️ GROQ_API_KEY environment variable not set. Please configure it before running.")
-    st.stop()
+center_cols = st.columns([1, 1, 1])
+with center_cols[1]:
+    uploaded_file = st.file_uploader(
+        "",
+        type=["pdf"],
+        label_visibility="collapsed"
+    )
 
-# Initialize session state
-if "xml_content" not in st.session_state:
-    st.session_state.xml_content = None
-if "xml_path" not in st.session_state:
-    st.session_state.xml_path = None
-
-# Main content - simple hero-style uploader and side-by-side preview/output
-
-uploaded_file = st.file_uploader(
-    "Browse files",
-    type=["pdf"],
-    help="Select a PDF document to convert to XML",
-    label_visibility="visible"
-)
-
-# Centered primary action
-btn_col = st.columns([1, 1, 1])
-with btn_col[1]:
-    generate = st.button("🚀 Generate XML", use_container_width=True, disabled=not uploaded_file)
-
-if uploaded_file and generate:
-    with st.spinner("🔄 Converting PDF to XML..."):
+# Auto-generate when file is uploaded
+if uploaded_file:
+    with st.spinner("Converting PDF to XML..."):
         try:
-            # Save uploaded file
             temp_dir = tempfile.gettempdir()
             save_path = os.path.join(temp_dir, uploaded_file.name)
-            
             with open(save_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
-            
-            # Convert to XML
+
             tool = PDFtoXMLSchemaTool(api_key=api_key)
             xml_output_path = tool.forward(save_path)
-            
+
             if os.path.exists(xml_output_path):
                 with open(xml_output_path, "r", encoding="utf-8") as xml_file:
                     st.session_state.xml_content = xml_file.read()
                     st.session_state.xml_path = xml_output_path
-                st.success("✅ XML generated successfully!")
             else:
-                st.error(f"❌ Conversion failed: {xml_output_path}")
-                
-        except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
+                st.session_state.xml_content = None
+                st.session_state.xml_path = None
+        except Exception:
+            st.session_state.xml_content = None
+            st.session_state.xml_path = None
 
 # Two columns: preview and output
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
-    st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.markdown("### 🖼️ PDF Preview")
+    # PDF preview
     if uploaded_file:
         try:
             temp_dir = tempfile.gettempdir()
@@ -347,15 +360,9 @@ with col1:
             
             st.image(img_path, use_container_width=True)
         except Exception as e:
-            st.info(f"ℹ️ Preview unavailable: {str(e)}")
-    else:
-        st.info("Upload a PDF to see a preview here.")
-    st.markdown('</div>', unsafe_allow_html=True)
+            st.empty()
 
 with col2:
-    st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.markdown("### 📋 XML Output")
-    
     if st.session_state.xml_content:
         # Display XML
         st.code(st.session_state.xml_content, language="xml", line_numbers=True)
@@ -369,19 +376,7 @@ with col2:
             use_container_width=True
         )
         
-        # Stats
-        lines = st.session_state.xml_content.count('\\n') + 1
-        size_kb = len(st.session_state.xml_content.encode('utf-8')) / 1024
-        
-        st.markdown("---")
-        col_a, col_b = st.columns(2)
-        col_a.metric("Lines", f"{lines:,}")
-        col_b.metric("Size", f"{size_kb:.1f} KB")
-        
     else:
-        st.info("👆 Upload a PDF and click Generate to see the XML output here.")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.empty()
 
-# Footer
-st.markdown('<div class="footer-text">Powered by Groq AI • Built with Streamlit</div>', unsafe_allow_html=True)
+# Remove footer entirely
