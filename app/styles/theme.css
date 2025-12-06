@@ -1,0 +1,45 @@
+.stApp {
+  background: #0f172a !important;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+}
+
+p,
+small,
+label,
+span,
+div {
+  color: #cbd5e1 !important;
+}
+
+.block-container {
+  padding-top: 2rem !important;
+  padding-bottom: 2rem !important;
+}
+
+.stButton>button {
+  background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 0.6rem 1.2rem !important;
+  font-weight: 600 !important;
+}
+
+.stFileUploader {
+  border: 1px dashed #334155 !important;
+  border-radius: 12px !important;
+  padding: 1rem !important;
+  background: #0b1220 !important;
+}
+

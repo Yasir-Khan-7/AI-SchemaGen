@@ -7,8 +7,13 @@ import time
 import os
 import tempfile
 
-# Streamlit UI
+# Streamlit UI config
 st.set_page_config(page_title="PDF to XML Converter", page_icon="📄", layout="wide")
+# Load custom theme
+theme_path = os.path.join(os.path.dirname(__file__), "app", "styles", "theme.css")
+if os.path.exists(theme_path):
+    with open(theme_path) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Initialize Groq client via env
 api_key = os.getenv("GROQ_API_KEY")
@@ -124,8 +129,8 @@ st.markdown("""
             border-bottom: 4px solid red !important;
             }
         .stApp  {
-            background: #4ca1af !important;
-            font-family: 'Arial', sans-serif;
+            background: #0f172a !important;
+            font-family: 'Inter', sans-serif;
         }
         h1{
             text-align: center;
@@ -155,7 +160,7 @@ st.markdown("""
             }
        
        [data-testid="stFileUploaderDropzone"]{
-            background: #4ca1af !important;
+            background: #0ea5e9 !important;
             display: flex;
             max-width: 150px;
             margin:auto !important;
