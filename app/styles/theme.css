@@ -1,45 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121a;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-accent: rgba(99, 102, 241, 0.3);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-violet: #8b5cf6;
+  --accent-indigo: #6366f1;
+  --accent-cyan: #06b6d4;
+  --gradient-primary: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa);
+  --gradient-accent: linear-gradient(135deg, #06b6d4, #8b5cf6);
+}
+
 .stApp {
-  background: #0f172a !important;
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif !important;
+  background: linear-gradient(180deg, #0a0a0f 0%, #0f0f1a 50%, #0a0a0f 100%) !important;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: #e2e8f0 !important;
-  font-weight: 600 !important;
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
 }
 
-p,
-small,
-label,
-span,
-div {
-  color: #cbd5e1 !important;
+p, small, label, span, div {
+  color: var(--text-secondary) !important;
 }
 
 .block-container {
-  padding-top: 2rem !important;
+  padding-top: 1rem !important;
   padding-bottom: 2rem !important;
+  max-width: 1200px !important;
 }
 
-.stButton>button {
-  background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
+.stButton > button {
+  background: var(--gradient-primary) !important;
   color: white !important;
   border: none !important;
-  border-radius: 10px !important;
-  padding: 0.6rem 1.2rem !important;
+  border-radius: 12px !important;
+  padding: 0.85rem 2rem !important;
   font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25) !important;
+  transition: all 0.3s ease !important;
+}
+
+.stButton > button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4) !important;
 }
 
 .stFileUploader {
-  border: 1px dashed #334155 !important;
-  border-radius: 12px !important;
-  padding: 1rem !important;
-  background: #0b1220 !important;
+  border: 2px dashed rgba(99, 102, 241, 0.2) !important;
+  border-radius: 16px !important;
+  padding: 1.5rem !important;
+  background: rgba(99, 102, 241, 0.03) !important;
+  transition: all 0.3s ease !important;
 }
 
+.stFileUploader:hover {
+  border-color: rgba(99, 102, 241, 0.4) !important;
+  background: rgba(99, 102, 241, 0.06) !important;
+}
