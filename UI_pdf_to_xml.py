@@ -1,17 +1,29 @@
-import streamlit as st
-import os
-import tempfile
-import fitz  # PyMuPDF
-from app.utils.pdf_to_xml import PDFtoXMLSchemaTool
+# ============================================================================
+# PDF to XML Converter UI - Streamlit Application
+# Web interface for converting PDF documents to structured XML format
+# ============================================================================
 
-# Page config
+import streamlit as st  # Web app framework
+import os  # Environment variable access
+import tempfile  # Temporary file handling
+import fitz  # PyMuPDF for PDF rendering and preview
+from app.utils.pdf_to_xml import PDFtoXMLSchemaTool  # AI conversion tool
+
+# ============================================================================
+# PAGE CONFIGURATION
+# ============================================================================
+# Configure Streamlit page settings: title, icon, layout
 st.set_page_config(
-    page_title="PDF to XML Converter",
-    page_icon="📄",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    page_title="PDF to XML Converter",  # Browser tab title
+    page_icon="📄",  # Browser tab icon
+    layout="wide",  # Use full width layout
+    initial_sidebar_state="collapsed"  # Hide sidebar by default
 )
 
+# ============================================================================
+# CUSTOM STYLING - Teal/Turquoise Theme
+# ============================================================================
+# Apply custom CSS to create a professional, modern UI with teal color scheme
 # Teal/Turquoise themed UI
 st.markdown("""
 <style>
@@ -281,19 +293,34 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# ============================================================================
+# SECURITY & INITIALIZATION
+# ============================================================================
 # Initialize API key
+# Retrieve Groq API key from environment variables (required for AI processing)
 api_key = os.getenv("GROQ_API_KEY")
 if not api_key:
     st.error("⚠️ GROQ_API_KEY environment variable not set. Please configure it before running.")
     st.stop()
 
-# Initialize session state
+# ============================================================================
+# SESSION STATE MANAGEMENT
+# ============================================================================
+# Initialize session state variables to persist data during user interactions
+# Session state allows data to survive page reruns in Streamlit
+
+# Store generated XML content (persists across reruns)
 if "xml_content" not in st.session_state:
     st.session_state.xml_content = None
+
+# Store path to generated XML file (persists across reruns)
 if "xml_path" not in st.session_state:
     st.session_state.xml_path = None
 
-# Header
+# ============================================================================
+# UI HEADER
+# ============================================================================
+# Display the main header with title and subtitle
 st.markdown("""
 <div class="header-container">
     <div class="badge">FREE AI TOOL</div>
@@ -307,76 +334,119 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# ============================================================================
+# FILE UPLOADER
+# ============================================================================
+# Create centered file upload area for PDF selection
+
+# Create 3 columns with center column for the uploader (for centering effect)
 center_cols = st.columns([1, 1, 1])
 with center_cols[1]:
+    # File uploader widget - accepts only PDF files
     uploaded_file = st.file_uploader(
-        "",
-        type=["pdf"],
+        "",  # Empty label (styled via CSS)
+        type=["pdf"],  # Only allow PDF files
         label_visibility="collapsed"
     )
 
-# Auto-generate when file is uploaded
+# ============================================================================
+# FILE PROCESSING
+# ============================================================================
+# Automatically process PDF when file is uploaded
 if uploaded_file:
+    # Show loading spinner while processing
     with st.spinner("Converting PDF to XML..."):
         try:
+            # Step 1: Save uploaded file to temporary directory
             temp_dir = tempfile.gettempdir()
             save_path = os.path.join(temp_dir, uploaded_file.name)
             with open(save_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
 
+            # Step 2: Initialize PDF to XML conversion tool with API key
             tool = PDFtoXMLSchemaTool(api_key=api_key)
+            
+            # Step 3: Convert PDF to XML
             xml_output_path = tool.forward(save_path)
 
+            # Step 4: Read generated XML file and store in session state
             if os.path.exists(xml_output_path):
                 with open(xml_output_path, "r", encoding="utf-8") as xml_file:
+                    # Store XML content for display and download
                     st.session_state.xml_content = xml_file.read()
+                    # Store file path for download button
                     st.session_state.xml_path = xml_output_path
             else:
+                # XML generation failed, clear session state
                 st.session_state.xml_content = None
                 st.session_state.xml_path = None
         except Exception:
+            # If any error occurs, clear session state to prevent stale data
             st.session_state.xml_content = None
             st.session_state.xml_path = None
 
-# Two columns: preview and output
+# ============================================================================
+# LAYOUT: TWO COLUMNS (PDF PREVIEW + XML OUTPUT)
+# ============================================================================
+# Left column: PDF preview | Right column: XML code display
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
-    # PDF preview
+    # ====================================================================
+    # COLUMN 1: PDF PREVIEW
+    # ====================================================================
+    # Render first page of PDF as image preview
     if uploaded_file:
         try:
+            # Save uploaded file to temporary location for processing
             temp_dir = tempfile.gettempdir()
             save_path = os.path.join(temp_dir, uploaded_file.name)
             
+            # Ensure file is saved
             if not os.path.exists(save_path):
                 with open(save_path, "wb") as f:
                     f.write(uploaded_file.getbuffer())
             
+            # Open PDF and extract first page
             doc = fitz.open(save_path)
             first_page = doc[0]
+            
+            # Render page at 150 DPI for good quality preview
             pix = first_page.get_pixmap(dpi=150)
+            
+            # Save rendered page as PNG image
             img_path = save_path.replace(".pdf", "_preview.png")
             pix.save(img_path)
             
+            # Display image in column with full width
             st.image(img_path, use_container_width=True)
         except Exception as e:
+            # If preview fails, show empty space
             st.empty()
 
 with col2:
+    # ====================================================================
+    # COLUMN 2: XML OUTPUT & DOWNLOAD
+    # ====================================================================
+    # Display generated XML code and provide download option
     if st.session_state.xml_content:
-        # Display XML
+        # Display XML with syntax highlighting and line numbers
         st.code(st.session_state.xml_content, language="xml", line_numbers=True)
         
-        # Download button
+        # Provide download button for XML file
         st.download_button(
-            label="⬇️ Download XML",
-            data=st.session_state.xml_content,
-            file_name=os.path.basename(st.session_state.xml_path),
-            mime="application/xml",
-            use_container_width=True
+            label="⬇️ Download XML",  # Button label with download icon
+            data=st.session_state.xml_content,  # File content
+            file_name=os.path.basename(st.session_state.xml_path),  # Use original filename
+            mime="application/xml",  # Set correct MIME type for XML
+            use_container_width=True  # Full width button
         )
         
     else:
+        # If no XML generated yet, show empty space
         st.empty()
 
-# Remove footer entirely
+# ============================================================================
+# FOOTER
+# ============================================================================
+# Remove default Streamlit footer
